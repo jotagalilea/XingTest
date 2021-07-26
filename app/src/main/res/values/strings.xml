@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">XingTest</string>
+    <string name="synchronisation_service">Servicio de sincronización de repos</string>
+    <string name="synchronisation_finished">Sincronización completada</string>
+    <string name="synchronisation_failed">Sincronización fallida</string>
+    <string name="notification_synchronise_title">Sincronizando…</string>
+    <string name="notification_synchronise_body">Sincronizando los datos…</string>
+    <string name="got_repos_empty">No hay repositorios que mostrar</string>
+    <string name="got_repos_success">Obtenidos los repos</string>
+    <string name="got_repos_error">Ha ocurrido un error al obtener los repositorios</string>
+    <string name="ask_which_url">¿A qué url quieres ir?</string>
+    <string name="repo_option">Repositorio</string>
+    <string name="owner_option">Dueño</string>
+    <string name="cancel">Cancelar</string>
+</resources>
