@@ -16,17 +16,14 @@ class AvatarCacher(
     private val context: Context
 ) {
 
+    // Útil para tener un registro de los avatares ya descargados.
     // <url remota, ruta del fichero>
-    //TODO: ¿ESTOY ACTUALIZANDO Y MIRANDO ESTO EN ALGUNA PARTE?
-    val cachedAvatars: HashMap<String, String> = HashMap()
+    val savedAvatars: HashMap<String, String> = HashMap()
 
-
-    //TODO: Repasar comentario
     /**
-     * Si no se tiene, toma la imagen de url, la guarda en BD y guarda la ruta del archivo en el modelo.
+     * Si no se tiene el avatar, lo toma de url, lo guarda en un archivo y guarda la ruta de este en el modelo.
      */
-    fun cacheAvatar(repo: Repo){
-        val url = repo.avatar_url
+    fun cacheAvatar(repo: Repo) {
         val dir = context.getExternalFilesDir(Environment.getStorageDirectory().toString() + "/Avatares/")
         if (!dir?.exists()!!)
             dir.mkdirs()
@@ -34,29 +31,23 @@ class AvatarCacher(
         val path = dir.absolutePath
         val out = File(path + '/' + repo.login + ".png")
         repo.avatar_file = out.absolutePath
-        val fos = FileOutputStream(out)
 
-        if (!cachedAvatars.containsKey(url)) {
-            Glide.with(context)
-                .load(repo.avatar_url)
-                .into(object : CustomTarget<Drawable>() {
-                    override fun onResourceReady(
-                        resource: Drawable,
-                        transition: Transition<in Drawable>?
-                    ) {
-                        val bitmap = (resource as BitmapDrawable).bitmap
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-                        fos.flush()
-                        fos.close()
-                    }
+        Glide.with(context)
+            .load(repo.avatar_url)
+            .into(object : CustomTarget<Drawable>() {
+                override fun onResourceReady(
+                    resource: Drawable,
+                    transition: Transition<in Drawable>?
+                ) {
+                    val fos = FileOutputStream(out)
+                    val bitmap = (resource as BitmapDrawable).bitmap
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                    fos.flush()
+                    savedAvatars[repo.avatar_url] = repo.avatar_file
+                    fos.close()
+                }
 
-                    override fun onLoadCleared(placeholder: Drawable?) {}
-
-                })
-        }
-        else {
-            fos.close()
-        }
+                override fun onLoadCleared(placeholder: Drawable?) {}
+            })
     }
-
 }

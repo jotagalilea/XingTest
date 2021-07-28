@@ -6,9 +6,7 @@ import io.reactivex.Single
 
 interface RepoDataStore {
 
-    fun clearRepositories(): Completable
-    fun getCachedRepositories(): Single<List<Repo>>
-    fun getRemoteRepositories(): Single<List<Repo>>
+    fun getRepositories(): Single<List<Repo>>
     fun saveRepository(repo: Repo): Completable
 
 }

@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide
 import com.jotagalilea.xingtest.model.Repo
 import com.jotagalilea.xingtest.R
 import com.jotagalilea.xingtest.databinding.RowMainRepoBinding
+import java.io.File
 
 class ReposAdapter(private val itemLongClickListener: OnItemLongClickListener)
     : RecyclerView.Adapter<ReposAdapter.RepoRowViewHolder>(){
@@ -41,12 +42,12 @@ class ReposAdapter(private val itemLongClickListener: OnItemLongClickListener)
             holder.repoName.text = item.name
             holder.login.text = item.login
             holder.description.text = item.description
-            //TODO: Cargarme Picasso
+            var path = item.avatar_file
+            if (!File(path).exists())
+                path = item.avatar_url
             context?.let { ctxt ->
                 Glide.with(ctxt)
-                    .load(item.avatar_file)
-                    //.load(item.avatar_url)
-                    //.load("/storage/emulated/0/Android/data/com.jotagalilea.xingtest/files/storage/emulated/0/Avatares/xing.png")
+                    .load(path)
                     .error(R.drawable.ic_error)
                     .into(holder.avatar)
 

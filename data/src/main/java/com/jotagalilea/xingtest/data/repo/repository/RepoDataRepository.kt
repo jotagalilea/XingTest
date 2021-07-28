@@ -7,16 +7,12 @@ import io.reactivex.Single
 
 class RepoDataRepository(private val factory: RepoDataStoreFactory): RepoRepository {
 
-    override fun clearRepositories(): Completable {
-        return factory.retrieveCachedDataStore().clearRepositories()
-    }
-
     override fun getCachedRepositories(): Single<List<Repo>> {
-        return factory.retrieveCachedDataStore().getCachedRepositories()
+        return factory.retrieveCachedDataStore().getRepositories()
     }
 
     override fun getRemoteRepositories(howMany: Int, page: Int): Single<List<Repo>> {
-        return factory.retrieveRemoteDataStore().getRemoteRepositories()
+        return factory.retrieveRemoteDataStore().getRepositories()
     }
 
     override fun saveRepository(repo: Repo): Completable {

@@ -1,19 +1,15 @@
 package com.jotagalilea.xingtest.ui.main
 
-import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -41,15 +37,6 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
     private lateinit var binding: ActivityScrollingBinding
     private val viewModel: RepoViewModel by viewModel()
     private var localBroadcastManager: LocalBroadcastManager? = null
-    private val requestPermissionLauncher = registerForActivityResult(RequestPermission()){
-            granted: Boolean ->
-        if (granted)
-            initComponents()
-        else {
-            //TODO: ¿Esto es lo mejor?
-            //finishAndRemoveTask()
-        }
-    }
     private val synchronisationBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
             intent?.let {
@@ -64,101 +51,11 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //TODO: Hacer que salga de la app.
-        //      Mostrar toast diciendo que necesita el permiso.
-        /*val requestPermissionLauncher = registerForActivityResult(RequestPermission()){
-            granted: Boolean ->
-            if (granted)
-                initComponents()
-            else {
-                //TODO: ¿Esto es lo mejor?
-                finishAndRemoveTask()
-            }
-        }*/
-        checkWritePermission(requestPermissionLauncher)
-    }
-
-    //TODO: Quizá tengo que quitar el request como parámetro...
-    private fun checkWritePermission(requestPermissionLauncher: ActivityResultLauncher<String>){
-        when {
-            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
-                Log.d("Entra en", "checkSelf")
-                initComponents()
-            }
-            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
-                Log.d("Entra en", "shouldShow")
-                //TODO: Debería hacer que en caso de denegar el permiso continuara y simplemente no cargase las imágenes
-                //      de fichero, pero sí de url. Poner tb un aviso de que en caso afirmativo cargará más rápido.
-                showPermissionNoticeDialog(requestPermissionLauncher)
-            }
-            else -> {
-                //TODO: Pensar qué sería correcto aquí:
-                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-        }
-    }
-
-    /**
-     * Ver https://developer.android.com/training/permissions/requesting
-     */
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            1 -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // Permission is granted, so nothing to do
-                    Log.d("PERMISOS", "Concedida escritura en almacenamiento")
-                } else {
-                    if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                        // Explain to the user that the feature is unavailable because
-                        // the features requires a permission that the user has denied.
-                        // At the same time, respect the user's decision. Don't link to
-                        // system settings in an effort to convince the user to change
-                        // their decision.
-                        //showVoiceRecordingPermissionDeniedDialog()
-                        showPermissionNoticeDialog(requestPermissionLauncher)
-                    } else {
-                        // Denied forever
-                        //showVoiceRecordingPermissionDeniedForeverDialog()
-                        //TODO: Dejar que inicie la app!!
-                        finishAndRemoveTask()
-                    }
-                }
-                return
-            }
-            // Add other 'when' lines to check for other permissions this fragment might request
-            else -> {
-                // Ignore all other requests
-                //TODO: OJO!! para API 29 y habiendo denegado forever llega aquí!!
-                //      ¿¡Y ha guardado la imagen!? Eso es porque no estoy escribiendo en el directorio correcto...
-                Log.d("LLEGA", "llega")
-                //showPermissionNoticeDialog(requestPermissionLauncher)
-                initComponents()
-            }
-        }
-    }
-
-    private fun showPermissionNoticeDialog(requestPermissionLauncher: ActivityResultLauncher<String>){
-        AlertDialog.Builder(this)
-            .setMessage(R.string.permission_notice)
-            .setPositiveButton(R.string.grant) { _, _ ->
-                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-            .setNegativeButton(R.string.deny) { _, _ ->
-                finishAndRemoveTask()
-            }
-            .create().show()
-    }
-
-    private fun initComponents(){
         localBroadcastManager = LocalBroadcastManager.getInstance(this)
         initializeSynchronisationBroadcastReceiver()
         setupUI()
-        setupObservers()}
+        setupObservers()
+    }
 
     private fun initializeSynchronisationBroadcastReceiver() {
         val filter = IntentFilter().apply {

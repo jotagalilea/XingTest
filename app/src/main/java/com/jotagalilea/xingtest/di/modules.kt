@@ -4,7 +4,6 @@ import androidx.room.Room
 import com.jotagalilea.xingtest.data.executor.JobExecutor
 import com.jotagalilea.xingtest.data.executor.PostExecutionThread
 import com.jotagalilea.xingtest.data.executor.ThreadExecutor
-import com.jotagalilea.xingtest.data.repo.interactor.ClearRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.GetCachedRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.GetRemoteRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.SaveRepositoriesUseCase
@@ -31,6 +30,7 @@ import org.koin.dsl.module
 val applicationModule = module(override = true) {
     single { JobExecutor() as ThreadExecutor }
     single { UIThread() as PostExecutionThread }
+    single { AvatarCacher(androidContext()) }
 
     single {
         Room.databaseBuilder(
@@ -46,15 +46,13 @@ val applicationModule = module(override = true) {
     factory { ReposServiceFactory.makeService() }
     factory<RepoRepository> { RepoDataRepository(get()) }
     factory<RepoDataStore>(named("remote")) { RepositoriesRemoteDataStore(get(), get(), get()) }
-    factory<RepoDataStore>(named("local")) { RepositoriesCachedDataStore(get(), get()) }
+    factory<RepoDataStore>(named("local")) { RepositoriesCachedDataStore(get(), get(), get()) }
     factory { RepoDataStoreFactory(get(named("local")), get(named("remote"))) }
-    factory { AvatarCacher(androidContext()) }
 }
 
 val repositoriesModule = module(override = true) {
     factory { GetCachedRepositoriesUseCase(get(), get(), get()) }
     factory { GetRemoteRepositoriesUseCase(get(), get(), get()) }
     factory { SaveRepositoriesUseCase(get(), get(), get()) }
-    factory { ClearRepositoriesUseCase(get(), get(), get()) }
     viewModel { RepoViewModel(get(), androidContext()) }
 }

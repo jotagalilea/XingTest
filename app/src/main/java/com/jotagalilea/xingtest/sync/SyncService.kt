@@ -12,7 +12,6 @@ import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.jotagalilea.xingtest.data.repo.interactor.ClearRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.GetCachedRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.GetRemoteRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.SaveRepositoriesUseCase
@@ -35,8 +34,6 @@ class SyncService: Service() {
     private var localBroadcastManager: LocalBroadcastManager? = null
     private val getCachedReposUseCase: GetCachedRepositoriesUseCase by inject()
     private val getRemoteReposUseCase: GetRemoteRepositoriesUseCase by inject()
-    //TODO: cargarme los clear!
-    private val clearReposUseCase: ClearRepositoriesUseCase by inject()
     private val saveReposUseCase: SaveRepositoriesUseCase by inject()
 
 
