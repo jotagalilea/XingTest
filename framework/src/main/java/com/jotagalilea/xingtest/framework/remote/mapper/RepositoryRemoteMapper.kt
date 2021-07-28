@@ -12,7 +12,9 @@ class RepositoryRemoteMapper {
             login = response.owner.login ?: "",
             repo_html_url = response.html_url ?: "",
             owner_html_url = response.owner.html_url ?: "",
-            fork = response.fork ?: false
+            fork = response.fork ?: false,
+            avatar_url = response.owner.avatar_url ?: "",
+            avatar_file = ""
         )
     }
 

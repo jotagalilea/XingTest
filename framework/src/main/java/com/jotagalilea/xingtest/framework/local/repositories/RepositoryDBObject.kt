@@ -13,5 +13,7 @@ data class RepositoryDBObject(
     @ColumnInfo(name = "login") val login: String,
     @ColumnInfo(name = "repo_html_url") val repo_html_url: String,
     @ColumnInfo(name = "owner_html_url") val owner_html_url: String,
-    @ColumnInfo(name = "fork") val fork: Boolean
+    @ColumnInfo(name = "fork") val fork: Boolean,
+    @ColumnInfo(name = "avatar_url") val avatar_url: String,
+    @ColumnInfo(name = "avatar_file") val avatar_file: String
 )

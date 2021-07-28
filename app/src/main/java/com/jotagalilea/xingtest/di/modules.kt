@@ -16,6 +16,7 @@ import com.jotagalilea.xingtest.framework.remote.mapper.RepositoryRemoteMapper
 import com.jotagalilea.xingtest.framework.remote.repositories.RepositoriesRemoteDataStore
 import com.jotagalilea.xingtest.framework.remote.service.ReposServiceFactory
 import com.jotagalilea.xingtest.UIThread
+import com.jotagalilea.xingtest.framework.AvatarCacher
 import com.jotagalilea.xingtest.framework.Utils.DATABASE_NAME
 import com.jotagalilea.xingtest.framework.local.database.ReposDatabase
 import com.jotagalilea.xingtest.framework.local.mapper.RepositoryCacheMapper
@@ -44,9 +45,10 @@ val applicationModule = module(override = true) {
     factory { RepositoryCacheMapper() }
     factory { ReposServiceFactory.makeService() }
     factory<RepoRepository> { RepoDataRepository(get()) }
-    factory<RepoDataStore>(named("remote")) { RepositoriesRemoteDataStore(get(), get()) }
+    factory<RepoDataStore>(named("remote")) { RepositoriesRemoteDataStore(get(), get(), get()) }
     factory<RepoDataStore>(named("local")) { RepositoriesCachedDataStore(get(), get()) }
     factory { RepoDataStoreFactory(get(named("local")), get(named("remote"))) }
+    factory { AvatarCacher(androidContext()) }
 }
 
 val repositoriesModule = module(override = true) {

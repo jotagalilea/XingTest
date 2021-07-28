@@ -13,6 +13,7 @@ data class ReposResponse(
     @Serializable
     data class Owner(
         val login: String?,
-        val html_url: String?
+        val html_url: String?,
+        val avatar_url: String?
     )
 }

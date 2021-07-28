@@ -1,4 +1,4 @@
-package com.jotagalilea.data.interactor
+package com.jotagalilea.xingtest.data.interactor
 
 import com.jotagalilea.xingtest.data.executor.PostExecutionThread
 import com.jotagalilea.xingtest.data.executor.ThreadExecutor

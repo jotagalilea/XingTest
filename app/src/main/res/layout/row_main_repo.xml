@@ -7,15 +7,24 @@
     android:background="@color/purple_200"
     android:padding="8dp">
 
+    <ImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/li_main_repo_name"/>
+
     <TextView
         android:id="@+id/li_main_repo_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/black"
         android:textSize="18sp"
+        android:layout_marginHorizontal="8dp"
         app:layout_constraintBottom_toTopOf="@id/li_main_repo_description"
         app:layout_constraintEnd_toStartOf="@id/li_main_repo_login"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@id/iv_avatar"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Nombre Largo Moderado" />
 
@@ -39,7 +48,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/li_main_repo_name"
+        app:layout_constraintTop_toBottomOf="@id/iv_avatar"
         tools:text="Descripción del repo que debería ser un poco larga solo para ver qué tal sale en este elemento de la lista en varias líneas, en este caso espero que sean tres." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

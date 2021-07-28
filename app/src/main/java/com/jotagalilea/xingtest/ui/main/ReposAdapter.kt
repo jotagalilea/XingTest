@@ -4,9 +4,11 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.jotagalilea.xingtest.model.Repo
 import com.jotagalilea.xingtest.R
 import com.jotagalilea.xingtest.databinding.RowMainRepoBinding
@@ -39,8 +41,24 @@ class ReposAdapter(private val itemLongClickListener: OnItemLongClickListener)
             holder.repoName.text = item.name
             holder.login.text = item.login
             holder.description.text = item.description
+            //TODO: Evitar aquí cargar la imagen desde url si ya la tengo de otros repos
+            /*Picasso.get().isLoggingEnabled = true
+            Picasso.get()
+                .load(item.avatar_url)
+                .error(R.drawable.ic_error)
+                .into(holder.avatar)
             context?.let{ ctxt ->
                 holder.itemView.setBackgroundColor(if (item.fork) ctxt.getColor(R.color.teal_200) else ctxt.getColor(R.color.white))
+            }*/
+            context?.let { ctxt ->
+                Glide.with(ctxt)
+                    .load(item.avatar_file)
+                    //.load(item.avatar_url)
+                    //.load("/storage/emulated/0/Android/data/com.jotagalilea.xingtest/files/storage/emulated/0/Avatares/xing.png")
+                    .error(R.drawable.ic_error)
+                    .into(holder.avatar)
+
+                    holder.itemView.setBackgroundColor(if (item.fork) ctxt.getColor(R.color.teal_200) else ctxt.getColor(R.color.white))
             }
 
         } ?: run {
@@ -69,7 +87,7 @@ class ReposAdapter(private val itemLongClickListener: OnItemLongClickListener)
         val repoName: TextView = binding.liMainRepoName
         val login: TextView = binding.liMainRepoLogin
         val description: TextView = binding.liMainRepoDescription
-
+        val avatar: ImageView = binding.ivAvatar
 
         init {
             itemView.setOnLongClickListener(this)

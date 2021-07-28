@@ -1,6 +1,5 @@
 package com.jotagalilea.xingtest.data.executor
 
-import com.jotagalilea.xingtest.data.executor.ThreadExecutor
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
@@ -12,10 +11,9 @@ import java.util.concurrent.TimeUnit
 class JobExecutor : ThreadExecutor {
 
     private val workQueue: LinkedBlockingQueue<Runnable> = LinkedBlockingQueue()
-
     private val threadPoolExecutor: ThreadPoolExecutor
-
     private val threadFactory: ThreadFactory
+
 
     init {
         this.threadFactory = JobThreadFactory()
@@ -25,12 +23,14 @@ class JobExecutor : ThreadExecutor {
         )
     }
 
+
     override fun execute(runnable: Runnable?) {
         if (runnable == null) {
             throw IllegalArgumentException("Runnable to execute cannot be null")
         }
         this.threadPoolExecutor.execute(runnable)
     }
+
 
     private class JobThreadFactory : ThreadFactory {
         private var counter = 0
@@ -44,8 +44,8 @@ class JobExecutor : ThreadExecutor {
         }
     }
 
-    companion object {
 
+    companion object {
         private const val INITIAL_POOL_SIZE = 3
         private const val MAX_POOL_SIZE = 5
 

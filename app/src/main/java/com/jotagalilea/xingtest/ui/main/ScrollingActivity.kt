@@ -1,11 +1,19 @@
 package com.jotagalilea.xingtest.ui.main
 
-import android.content.*
+import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -20,7 +28,10 @@ import com.jotagalilea.xingtest.sync.SyncService.Companion.ACTION_SYNC_COMPLETED
 import com.jotagalilea.xingtest.sync.SyncService.Companion.START_SERVICE
 import com.jotagalilea.xingtest.sync.SyncService.Companion.SYNC_COMPLETED
 import com.jotagalilea.xingtest.ui.common.ObjectStatus
-import com.jotagalilea.xingtest.ui.common.ObjectStatus.*
+import com.jotagalilea.xingtest.ui.common.ObjectStatus.Empty
+import com.jotagalilea.xingtest.ui.common.ObjectStatus.Error
+import com.jotagalilea.xingtest.ui.common.ObjectStatus.Loading
+import com.jotagalilea.xingtest.ui.common.ObjectStatus.Success
 import com.jotagalilea.xingtest.ui.common.ObservableEvent
 import com.jotagalilea.xingtest.viewmodel.RepoViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -42,13 +53,92 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //TODO: Hacer que salga de la app.
+        //      Mostrar toast diciendo que necesita el permiso.
+        val requestPermissionLauncher = registerForActivityResult(RequestPermission()){
+            granted: Boolean ->
+            if (!granted)
+                finishAndRemoveTask()
+            else {
+                initComponents()
+            }
+
+        }
+        checkWritePermission(requestPermissionLauncher)
+        /*when {
+            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                Log.d("Entra en", "checkSelf")
+                initComponents()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                Log.d("Entra en", "shouldShow")
+                AlertDialog.Builder(this)
+                    .setMessage(R.string.permission_notice)
+                    .setPositiveButton(R.string.grant) { _, _ ->
+                        initComponents()
+                    }
+                    .setNegativeButton(R.string.deny) { _, _ ->
+                        finishAndRemoveTask()
+                    }
+                    .create().show()
+            }
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }*/
+        /*if (!checkWritePermission()) {
+            finishAndRemoveTask()
+        }
         localBroadcastManager = LocalBroadcastManager.getInstance(this)
         initializeSynchronisationBroadcastReceiver()
         setupUI()
         setupObservers()
+
+         */
+    }
+
+    private fun checkWritePermission(requestPermissionLauncher: ActivityResultLauncher<String>){
+        when {
+            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                Log.d("Entra en", "checkSelf")
+                initComponents()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                Log.d("Entra en", "shouldShow")
+                AlertDialog.Builder(this)
+                    .setMessage(R.string.permission_notice)
+                    .setPositiveButton(R.string.grant) { _, _ ->
+                        initComponents()
+                    }
+                    .setNegativeButton(R.string.deny) { _, _ ->
+                        finishAndRemoveTask()
+                    }
+                    .create().show()
+            }
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+    }
+
+    private fun initComponents(){
+        localBroadcastManager = LocalBroadcastManager.getInstance(this)
+        initializeSynchronisationBroadcastReceiver()
+        setupUI()
+        setupObservers()}
+
+    private fun oldcheckWritePermission(): Boolean {
+        val writePerm = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (writePerm != PackageManager.PERMISSION_GRANTED) {
+            val perm = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            requestPermissions(perm, 1)
+            //onRequestPermissionsResult()
+            //checkPermission()
+            return false
+        }
+        return true
     }
 
     private fun initializeSynchronisationBroadcastReceiver() {
@@ -64,8 +154,7 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
             viewModel.fetchRepositories()
     }
 
-
-    private fun setupObservers(){
+    private fun setupObservers() {
         viewModel.getRepositoriesLiveData().observe(this,
             { status ->
                 handleResultStatus(status)
@@ -74,9 +163,8 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
 
         viewModel.observableEvent.observe(this,
             { event ->
-                when (event){
-                    ObservableEvent.StartReposSyncService ->
-                    {
+                when (event) {
+                    ObservableEvent.StartReposSyncService -> {
                         startSynchronisationProcess()
                     }
                 }
@@ -90,21 +178,19 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         applicationContext?.startService(synchroniseServiceIntent)
     }
 
-
-    private fun setupUI(){
+    private fun setupUI() {
         binding = ActivityScrollingBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(findViewById(R.id.toolbar))
         binding.toolbarLayout.title = title
-        binding.reposRecycler.addOnScrollListener(object: RecyclerView.OnScrollListener() {
+        binding.reposRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                if (!recyclerView.canScrollVertically(1) && (newState == RecyclerView.SCROLL_STATE_IDLE)){
-                    try{
+                if (!recyclerView.canScrollVertically(1) && (newState == RecyclerView.SCROLL_STATE_IDLE)) {
+                    try {
                         showLoading()
                         viewModel.fetchRepositories()
-                    }
-                    catch (e: Exception){
+                    } catch (e: Exception) {
                         Log.e("ERROR LOADING", e.printStackTrace().toString())
                         showError(getString(R.string.got_repos_error))
                     }
@@ -112,7 +198,6 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
             }
         })
     }
-
 
     private fun <T> handleResultStatus(status: ObjectStatus<T>) {
         when (status) {
@@ -123,15 +208,13 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         }
     }
 
-
-    fun showLoading(){
+    fun showLoading() {
         binding.emptyView.visibility = View.GONE
         binding.errorView.visibility = View.GONE
         binding.mainLoader.visibility = View.VISIBLE
     }
 
-
-    fun showEmpty(message: String?){
+    fun showEmpty(message: String?) {
         binding.reposRecycler.visibility = View.GONE
         binding.errorView.visibility = View.GONE
         binding.mainLoader.visibility = View.GONE
@@ -139,8 +222,7 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         binding.emptyView.text = message
     }
 
-
-    fun showError(message: String?){
+    fun showError(message: String?) {
         binding.reposRecycler.visibility = View.GONE
         binding.emptyView.visibility = View.GONE
         binding.mainLoader.visibility = View.GONE
@@ -148,8 +230,7 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         binding.errorView.text = message
     }
 
-
-    fun <T> setupScreenForSuccess(data: T){
+    fun <T> setupScreenForSuccess(data: T) {
         val repos = data as List<*>
         repos.filterIsInstance<Repo>().also {
             showSuccess()
@@ -157,21 +238,18 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         }
     }
 
-
-    private fun loadRecyclerContent(repos: MutableList<Repo>){
+    private fun loadRecyclerContent(repos: MutableList<Repo>) {
         val recycler: RecyclerView = binding.reposRecycler
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = ReposAdapter(this).apply { addItems(repos) }
     }
 
-
-    fun showSuccess(){
+    fun showSuccess() {
         binding.emptyView.visibility = View.GONE
         binding.errorView.visibility = View.GONE
         binding.mainLoader.visibility = View.GONE
         binding.reposRecycler.visibility = View.VISIBLE
     }
-
 
     private fun sendSynchronisationCompleted(intent: Intent) {
         when (intent.getSerializableExtra(SYNC_COMPLETED)) {
@@ -186,7 +264,6 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         }
     }
 
-
     override fun onLongClick(repo: Repo): Boolean {
         AlertDialog.Builder(this)
             .setMessage(R.string.ask_which_url)
@@ -200,12 +277,10 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         return true
     }
 
-
-    private fun openUrl(url: String){
+    private fun openUrl(url: String) {
         val intent = Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) }
         startActivity(intent)
     }
-
 
     override fun onDestroy() {
         super.onDestroy()

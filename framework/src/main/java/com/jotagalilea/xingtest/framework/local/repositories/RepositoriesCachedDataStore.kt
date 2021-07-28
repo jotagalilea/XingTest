@@ -35,6 +35,8 @@ class RepositoriesCachedDataStore constructor(
 
     override fun saveRepository(repo: Repo): Completable {
         return Completable.defer {
+            //TODO: Quitar de aquí:
+            //saveAvatar(repo)
             database.cachedRepositoriesDao().insertRepository(
                 mapper.mapToCached(repo))
 
@@ -42,4 +44,7 @@ class RepositoriesCachedDataStore constructor(
             Completable.complete()
         }
     }
+
+
+
 }

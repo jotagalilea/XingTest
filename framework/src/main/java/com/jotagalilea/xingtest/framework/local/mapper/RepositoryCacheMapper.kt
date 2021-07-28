@@ -12,7 +12,9 @@ class RepositoryCacheMapper {
             login = dbObject.login,
             repo_html_url = dbObject.repo_html_url,
             owner_html_url = dbObject.owner_html_url,
-            fork = dbObject.fork
+            fork = dbObject.fork,
+            avatar_url = dbObject.avatar_url,
+            avatar_file = dbObject.avatar_file
         )
     }
 
@@ -23,7 +25,9 @@ class RepositoryCacheMapper {
             login = repo.login,
             repo_html_url = repo.repo_html_url,
             owner_html_url = repo.owner_html_url,
-            fork = repo.fork
+            fork = repo.fork,
+            avatar_url = repo.avatar_url,
+            avatar_file = repo.avatar_file
         )
     }
 

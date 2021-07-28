@@ -2,7 +2,7 @@ package com.jotagalilea.xingtest.data.repo.interactor
 
 import com.jotagalilea.xingtest.data.executor.PostExecutionThread
 import com.jotagalilea.xingtest.data.executor.ThreadExecutor
-import com.jotagalilea.data.interactor.SingleUseCase
+import com.jotagalilea.xingtest.data.interactor.SingleUseCase
 import com.jotagalilea.xingtest.data.repo.repository.RepoRepository
 import com.jotagalilea.xingtest.model.Repo
 import io.reactivex.Single

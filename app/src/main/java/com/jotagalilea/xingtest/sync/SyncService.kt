@@ -18,7 +18,6 @@ import com.jotagalilea.xingtest.data.repo.interactor.GetRemoteRepositoriesUseCas
 import com.jotagalilea.xingtest.data.repo.interactor.SaveRepositoriesUseCase
 import com.jotagalilea.xingtest.sync.SyncResult.*
 import com.jotagalilea.xingtest.R
-import com.jotagalilea.xingtest.framework.Utils
 import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableCompletableObserver
@@ -148,6 +147,9 @@ class SyncService: Service() {
                         }
                     } else {
                         e.message?.let { Log.e(TAG_SYNC_SERVICE, "No se ha podido completar la sincronización. Error: $it") }
+                        ////////////////////////////////////////////////////
+                        e.printStackTrace()
+                        ////////////////////////////////////////////////////
                         manageResult(ERROR)
                     }
                 }
