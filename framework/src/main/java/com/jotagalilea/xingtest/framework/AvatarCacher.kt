@@ -17,7 +17,7 @@ class AvatarCacher(
 ) {
 
     // <url remota, ruta del fichero>
-    //TODO: Pensar otro sitio mejor para tener esto.
+    //TODO: ¿ESTOY ACTUALIZANDO Y MIRANDO ESTO EN ALGUNA PARTE?
     val cachedAvatars: HashMap<String, String> = HashMap()
 
 

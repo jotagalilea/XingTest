@@ -41,15 +41,7 @@ class ReposAdapter(private val itemLongClickListener: OnItemLongClickListener)
             holder.repoName.text = item.name
             holder.login.text = item.login
             holder.description.text = item.description
-            //TODO: Evitar aquí cargar la imagen desde url si ya la tengo de otros repos
-            /*Picasso.get().isLoggingEnabled = true
-            Picasso.get()
-                .load(item.avatar_url)
-                .error(R.drawable.ic_error)
-                .into(holder.avatar)
-            context?.let{ ctxt ->
-                holder.itemView.setBackgroundColor(if (item.fork) ctxt.getColor(R.color.teal_200) else ctxt.getColor(R.color.white))
-            }*/
+            //TODO: Cargarme Picasso
             context?.let { ctxt ->
                 Glide.with(ctxt)
                     .load(item.avatar_file)

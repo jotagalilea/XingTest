@@ -41,6 +41,15 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
     private lateinit var binding: ActivityScrollingBinding
     private val viewModel: RepoViewModel by viewModel()
     private var localBroadcastManager: LocalBroadcastManager? = null
+    private val requestPermissionLauncher = registerForActivityResult(RequestPermission()){
+            granted: Boolean ->
+        if (granted)
+            initComponents()
+        else {
+            //TODO: ¿Esto es lo mejor?
+            //finishAndRemoveTask()
+        }
+    }
     private val synchronisationBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
             intent?.let {
@@ -57,48 +66,19 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         super.onCreate(savedInstanceState)
         //TODO: Hacer que salga de la app.
         //      Mostrar toast diciendo que necesita el permiso.
-        val requestPermissionLauncher = registerForActivityResult(RequestPermission()){
+        /*val requestPermissionLauncher = registerForActivityResult(RequestPermission()){
             granted: Boolean ->
-            if (!granted)
-                finishAndRemoveTask()
+            if (granted)
+                initComponents()
             else {
-                initComponents()
-            }
-
-        }
-        checkWritePermission(requestPermissionLauncher)
-        /*when {
-            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
-                Log.d("Entra en", "checkSelf")
-                initComponents()
-            }
-            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
-                Log.d("Entra en", "shouldShow")
-                AlertDialog.Builder(this)
-                    .setMessage(R.string.permission_notice)
-                    .setPositiveButton(R.string.grant) { _, _ ->
-                        initComponents()
-                    }
-                    .setNegativeButton(R.string.deny) { _, _ ->
-                        finishAndRemoveTask()
-                    }
-                    .create().show()
-            }
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                //TODO: ¿Esto es lo mejor?
+                finishAndRemoveTask()
             }
         }*/
-        /*if (!checkWritePermission()) {
-            finishAndRemoveTask()
-        }
-        localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        initializeSynchronisationBroadcastReceiver()
-        setupUI()
-        setupObservers()
-
-         */
+        checkWritePermission(requestPermissionLauncher)
     }
 
+    //TODO: Quizá tengo que quitar el request como parámetro...
     private fun checkWritePermission(requestPermissionLauncher: ActivityResultLauncher<String>){
         when {
             checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
@@ -107,20 +87,71 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
             }
             shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
                 Log.d("Entra en", "shouldShow")
-                AlertDialog.Builder(this)
-                    .setMessage(R.string.permission_notice)
-                    .setPositiveButton(R.string.grant) { _, _ ->
-                        initComponents()
-                    }
-                    .setNegativeButton(R.string.deny) { _, _ ->
-                        finishAndRemoveTask()
-                    }
-                    .create().show()
+                //TODO: Debería hacer que en caso de denegar el permiso continuara y simplemente no cargase las imágenes
+                //      de fichero, pero sí de url. Poner tb un aviso de que en caso afirmativo cargará más rápido.
+                showPermissionNoticeDialog(requestPermissionLauncher)
             }
             else -> {
+                //TODO: Pensar qué sería correcto aquí:
                 requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
+    }
+
+    /**
+     * Ver https://developer.android.com/training/permissions/requesting
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            1 -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // Permission is granted, so nothing to do
+                    Log.d("PERMISOS", "Concedida escritura en almacenamiento")
+                } else {
+                    if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                        // Explain to the user that the feature is unavailable because
+                        // the features requires a permission that the user has denied.
+                        // At the same time, respect the user's decision. Don't link to
+                        // system settings in an effort to convince the user to change
+                        // their decision.
+                        //showVoiceRecordingPermissionDeniedDialog()
+                        showPermissionNoticeDialog(requestPermissionLauncher)
+                    } else {
+                        // Denied forever
+                        //showVoiceRecordingPermissionDeniedForeverDialog()
+                        //TODO: Dejar que inicie la app!!
+                        finishAndRemoveTask()
+                    }
+                }
+                return
+            }
+            // Add other 'when' lines to check for other permissions this fragment might request
+            else -> {
+                // Ignore all other requests
+                //TODO: OJO!! para API 29 y habiendo denegado forever llega aquí!!
+                //      ¿¡Y ha guardado la imagen!? Eso es porque no estoy escribiendo en el directorio correcto...
+                Log.d("LLEGA", "llega")
+                //showPermissionNoticeDialog(requestPermissionLauncher)
+                initComponents()
+            }
+        }
+    }
+
+    private fun showPermissionNoticeDialog(requestPermissionLauncher: ActivityResultLauncher<String>){
+        AlertDialog.Builder(this)
+            .setMessage(R.string.permission_notice)
+            .setPositiveButton(R.string.grant) { _, _ ->
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+            .setNegativeButton(R.string.deny) { _, _ ->
+                finishAndRemoveTask()
+            }
+            .create().show()
     }
 
     private fun initComponents(){
@@ -128,18 +159,6 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         initializeSynchronisationBroadcastReceiver()
         setupUI()
         setupObservers()}
-
-    private fun oldcheckWritePermission(): Boolean {
-        val writePerm = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        if (writePerm != PackageManager.PERMISSION_GRANTED) {
-            val perm = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            requestPermissions(perm, 1)
-            //onRequestPermissionsResult()
-            //checkPermission()
-            return false
-        }
-        return true
-    }
 
     private fun initializeSynchronisationBroadcastReceiver() {
         val filter = IntentFilter().apply {

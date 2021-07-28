@@ -35,6 +35,7 @@ class SyncService: Service() {
     private var localBroadcastManager: LocalBroadcastManager? = null
     private val getCachedReposUseCase: GetCachedRepositoriesUseCase by inject()
     private val getRemoteReposUseCase: GetRemoteRepositoriesUseCase by inject()
+    //TODO: cargarme los clear!
     private val clearReposUseCase: ClearRepositoriesUseCase by inject()
     private val saveReposUseCase: SaveRepositoriesUseCase by inject()
 
@@ -147,9 +148,7 @@ class SyncService: Service() {
                         }
                     } else {
                         e.message?.let { Log.e(TAG_SYNC_SERVICE, "No se ha podido completar la sincronización. Error: $it") }
-                        ////////////////////////////////////////////////////
                         e.printStackTrace()
-                        ////////////////////////////////////////////////////
                         manageResult(ERROR)
                     }
                 }
