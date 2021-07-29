@@ -18,7 +18,7 @@ class RepositoryCacheMapper {
         )
     }
 
-    fun mapToCached(repo: Repo): RepositoryDBObject{
+    fun mapToCached(repo: Repo): RepositoryDBObject {
         return RepositoryDBObject(
             name = repo.name,
             description = repo.description,
@@ -30,5 +30,4 @@ class RepositoryCacheMapper {
             avatar_file = repo.avatar_file
         )
     }
-
 }

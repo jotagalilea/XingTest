@@ -5,11 +5,12 @@ import com.jotagalilea.xingtest.data.executor.ThreadExecutor
 import com.jotagalilea.xingtest.data.interactor.CompletableUseCase
 import com.jotagalilea.xingtest.data.repo.repository.RepoRepository
 import com.jotagalilea.xingtest.model.Repo
-import io.reactivex.Completable
+import io.reactivex.rxjava3.core.Completable
 
-class SaveRepositoriesUseCase(private val repository: RepoRepository,
-                              threadExecutor: ThreadExecutor,
-                              postExecutionThread: PostExecutionThread
+class SaveRepositoriesUseCase(
+    private val repository: RepoRepository,
+    threadExecutor: ThreadExecutor,
+    postExecutionThread: PostExecutionThread
 ) : CompletableUseCase<List<Repo>?>(threadExecutor, postExecutionThread) {
 
     override fun buildUseCaseObservable(params: List<Repo>?): Completable {
@@ -20,5 +21,4 @@ class SaveRepositoriesUseCase(private val repository: RepoRepository,
 
         } ?: Completable.error(IllegalArgumentException("Params no puede ser null"))
     }
-
 }

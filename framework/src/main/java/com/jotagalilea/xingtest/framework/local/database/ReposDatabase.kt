@@ -14,7 +14,7 @@ import com.jotagalilea.xingtest.framework.local.repositories.RepositoryDBObject
     ],
     version = 1
 )
-abstract class ReposDatabase: RoomDatabase() {
+abstract class ReposDatabase : RoomDatabase() {
 
     private var INSTANCE: ReposDatabase? = null
     private val sLock = Any()

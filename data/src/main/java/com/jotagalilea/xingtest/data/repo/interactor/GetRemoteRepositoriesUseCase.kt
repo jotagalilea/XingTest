@@ -5,7 +5,7 @@ import com.jotagalilea.xingtest.data.executor.ThreadExecutor
 import com.jotagalilea.xingtest.data.interactor.SingleUseCase
 import com.jotagalilea.xingtest.data.repo.repository.RepoRepository
 import com.jotagalilea.xingtest.model.Repo
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Single
 
 class GetRemoteRepositoriesUseCase(
     private val repository: RepoRepository,
@@ -13,13 +13,9 @@ class GetRemoteRepositoriesUseCase(
     postExecutionThread: PostExecutionThread
 ) : SingleUseCase<List<Repo>, Void?>(threadExecutor, postExecutionThread) {
 
-    private var page = 0
-    private val howMany = 15
-
     public override fun buildUseCaseObservable(params: Void?): Single<List<Repo>> {
-        return repository.getRemoteRepositories(howMany, ++page).flatMap {
+        return repository.getRemoteRepositories().flatMap {
             Single.just(it)
         }
     }
-
 }

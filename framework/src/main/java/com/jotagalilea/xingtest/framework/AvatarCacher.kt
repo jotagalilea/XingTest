@@ -20,9 +20,6 @@ class AvatarCacher(
     // <url remota, ruta del fichero>
     val savedAvatars: HashMap<String, String> = HashMap()
 
-    /**
-     * Si no se tiene el avatar, lo toma de url, lo guarda en un archivo y guarda la ruta de este en el modelo.
-     */
     fun cacheAvatar(repo: Repo) {
         val dir = context.getExternalFilesDir(Environment.getStorageDirectory().toString() + "/Avatares/")
         if (!dir?.exists()!!)

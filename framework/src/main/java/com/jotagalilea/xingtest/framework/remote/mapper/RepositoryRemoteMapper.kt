@@ -17,5 +17,4 @@ class RepositoryRemoteMapper {
             avatar_file = ""
         )
     }
-
 }

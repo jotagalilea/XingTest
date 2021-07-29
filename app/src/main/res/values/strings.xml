@@ -12,7 +12,4 @@
     <string name="repo_option">Repositorio</string>
     <string name="owner_option">Dueño</string>
     <string name="cancel">Cancelar</string>
-    <string name="grant">Permitir</string>
-    <string name="deny">Denegar</string>
-    <string name="permission_notice">Para poder guardar las imágenes de los dueños de los repositorios es necesario que permitas a la app escribir en el almacenamiento</string>
-</resources>
+    </resources>

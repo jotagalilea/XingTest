@@ -6,26 +6,34 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.IBinder
+import android.os.Looper
+import android.os.Message
+import android.os.Process
 import android.util.Log
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.jotagalilea.xingtest.R
 import com.jotagalilea.xingtest.data.repo.interactor.GetCachedRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.GetRemoteRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.SaveRepositoriesUseCase
-import com.jotagalilea.xingtest.sync.SyncResult.*
-import com.jotagalilea.xingtest.R
-import io.reactivex.Completable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.observers.DisposableCompletableObserver
+import com.jotagalilea.xingtest.sync.SyncResult.ERROR
+import com.jotagalilea.xingtest.sync.SyncResult.SUCCESS
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.observers.DisposableCompletableObserver
 import org.koin.android.ext.android.inject
 import retrofit2.HttpException
 import java.util.concurrent.TimeUnit
 
 @Keep
-class SyncService: Service() {
+class SyncService : Service() {
 
     private var serviceLooper: Looper? = null
     private var serviceHandler: ServiceHandler? = null
@@ -35,7 +43,6 @@ class SyncService: Service() {
     private val getCachedReposUseCase: GetCachedRepositoriesUseCase by inject()
     private val getRemoteReposUseCase: GetRemoteRepositoriesUseCase by inject()
     private val saveReposUseCase: SaveRepositoriesUseCase by inject()
-
 
     companion object {
         const val ONGOING_NOTIFICATION_ID = 1001
@@ -49,7 +56,6 @@ class SyncService: Service() {
         const val SYNC_COMPLETED = "sync_completed"
         const val TAG_SYNC_SERVICE = "SYNC SERVICE"
     }
-
 
     override fun onCreate() {
         compositeDisposable = CompositeDisposable()
@@ -76,7 +82,6 @@ class SyncService: Service() {
 
         return START_STICKY
     }
-
 
     //region Synchronisation
     fun startSynchroniseService() {
@@ -111,25 +116,22 @@ class SyncService: Service() {
         startForeground(ONGOING_NOTIFICATION_ID, notification)
     }
 
-
     fun stopSynchroniseService() {
         compositeDisposable?.clear()
         reposDisposable?.clear()
-        //Utils.REPOS_LOCAL_QUERY_OFFSET += Utils.REPOS_QUERY_SIZE
         stopForeground(true)
         stopSelf()
         Log.d(TAG_SYNC_SERVICE, "Se ha parado el servicio de sincronización...")
     }
 
-
-    private fun syncRepositories(){
+    private fun syncRepositories() {
         try {
             reposDisposable?.add(getCachedReposUseCase.execute().flatMapCompletable { list ->
                 if (list.isEmpty())
                     getRemoteRepositories()
                         .retry(3)
                         .timeout(60, TimeUnit.SECONDS) // Por motivos de depuración lo dejo en 60 segundos.
-                else{
+                else {
                     Completable.complete()
                 }
 
@@ -160,7 +162,6 @@ class SyncService: Service() {
         }
     }
 
-
     private fun getRemoteRepositories(): Completable {
         return getRemoteReposUseCase.execute()
             .flatMapCompletable {
@@ -168,12 +169,10 @@ class SyncService: Service() {
             }
     }
 
-
-    private fun manageResult(result: SyncResult){
+    private fun manageResult(result: SyncResult) {
         sendResult(result)
         stopSynchroniseService()
     }
-
 
     private fun sendResult(result: SyncResult) {
         val completeIntent = Intent()
@@ -181,7 +180,6 @@ class SyncService: Service() {
         completeIntent.action = ACTION_SYNC_COMPLETED
         localBroadcastManager?.sendBroadcast(completeIntent)
     }
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun createNotificationChannel(context: Context, channelId: String, channelName: String, channelDescription: String): String {
@@ -197,7 +195,6 @@ class SyncService: Service() {
         return null
     }
     //endregion
-
 
     //region Inner classes
     private inner class ServiceHandler(looper: Looper) : Handler(looper) {

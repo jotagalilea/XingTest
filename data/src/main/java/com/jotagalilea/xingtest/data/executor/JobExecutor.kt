@@ -14,7 +14,6 @@ class JobExecutor : ThreadExecutor {
     private val threadPoolExecutor: ThreadPoolExecutor
     private val threadFactory: ThreadFactory
 
-
     init {
         this.threadFactory = JobThreadFactory()
         this.threadPoolExecutor = ThreadPoolExecutor(
@@ -23,7 +22,6 @@ class JobExecutor : ThreadExecutor {
         )
     }
 
-
     override fun execute(runnable: Runnable?) {
         if (runnable == null) {
             throw IllegalArgumentException("Runnable to execute cannot be null")
@@ -31,8 +29,8 @@ class JobExecutor : ThreadExecutor {
         this.threadPoolExecutor.execute(runnable)
     }
 
-
     private class JobThreadFactory : ThreadFactory {
+
         private var counter = 0
 
         override fun newThread(runnable: Runnable): Thread {
@@ -40,12 +38,13 @@ class JobExecutor : ThreadExecutor {
         }
 
         companion object {
+
             private const val THREAD_NAME = "android_"
         }
     }
 
-
     companion object {
+
         private const val INITIAL_POOL_SIZE = 3
         private const val MAX_POOL_SIZE = 5
 

@@ -107,7 +107,7 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
                         showLoading()
                         viewModel.fetchRepositories()
                     } catch (e: Exception) {
-                        Log.e("ERROR LOADING", e.printStackTrace().toString())
+                        Log.e("ERROR CARGANDO", e.printStackTrace().toString())
                         showError(getString(R.string.got_repos_error))
                     }
                 }

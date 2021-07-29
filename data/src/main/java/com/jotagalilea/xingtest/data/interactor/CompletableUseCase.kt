@@ -2,8 +2,8 @@ package com.jotagalilea.xingtest.data.interactor
 
 import com.jotagalilea.xingtest.data.executor.PostExecutionThread
 import com.jotagalilea.xingtest.data.executor.ThreadExecutor
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 /**
  * Abstract class for a UseCase that returns an instance of a [Completable].

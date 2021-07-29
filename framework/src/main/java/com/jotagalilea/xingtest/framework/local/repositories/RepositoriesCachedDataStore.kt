@@ -1,30 +1,29 @@
 package com.jotagalilea.xingtest.framework.local.repositories
 
 import android.util.Log
-import com.jotagalilea.xingtest.data.repo.repository.datastore.RepoDataStore
+import com.jotagalilea.xingtest.data.repo.repository.datastore.RepoCacheDataStore
 import com.jotagalilea.xingtest.framework.AvatarCacher
 import com.jotagalilea.xingtest.framework.Utils
 import com.jotagalilea.xingtest.framework.local.database.ReposDatabase
 import com.jotagalilea.xingtest.framework.local.mapper.RepositoryCacheMapper
 import com.jotagalilea.xingtest.model.Repo
-import io.reactivex.Completable
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 
 class RepositoriesCachedDataStore constructor(
     private val database: ReposDatabase,
     private val mapper: RepositoryCacheMapper,
     private val avatarCacher: AvatarCacher
-): RepoDataStore {
+) : RepoCacheDataStore {
 
     override fun getRepositories(): Single<List<Repo>> {
-        val result = Single.defer {
+        return Single.defer {
             Single.just(database.cachedRepositoriesDao().getRepositories(Utils.REPOS_QUERY_SIZE, Utils.REPOS_LOCAL_QUERY_OFFSET))
         }.map {
             it.map { repoDBobject ->
                 mapper.mapToModel(repoDBobject)
             }
         }
-        return result
     }
 
     override fun saveRepository(repo: Repo): Completable {
@@ -37,7 +36,4 @@ class RepositoriesCachedDataStore constructor(
             Completable.complete()
         }
     }
-
-
-
 }

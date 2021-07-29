@@ -1,6 +1,6 @@
 package com.jotagalilea.xingtest.data.executor
 
-import io.reactivex.Scheduler
+import io.reactivex.rxjava3.core.Scheduler
 
 /**
  * Thread abstraction created to change the execution context from any thread to any other thread.

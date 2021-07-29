@@ -9,7 +9,7 @@ data class ReposResponse(
     val owner: Owner,
     val html_url: String?,
     val fork: Boolean?
-){
+) {
     @Serializable
     data class Owner(
         val login: String?,

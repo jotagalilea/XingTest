@@ -43,7 +43,9 @@ class DatabaseAndRemoteTest {
                 "login${count}",
                 "repo${count}",
                 "owner${count}",
-                count%2 == 0
+                count%2 == 0,
+                "avatar_url${count}",
+                "avatar_file${count}"
             ))
     }
 
@@ -86,7 +88,7 @@ class DatabaseAndRemoteTest {
         val notMappedRepos = dao.getRepositories(limit, offset)
         val reposFromDB: MutableList<Repo> = notMappedRepos.map{ dbMapper.mapToModel(it) }.toMutableList()
         assertThat(reposFromDB).isEqualTo(localRepos)
-        reposFromDB.add(Repo("", "", "", "", "", false))
+        reposFromDB.add(Repo("", "", "", "", "", false, "", ""))
         assertThat(reposFromDB).isNotEqualTo(localRepos)
     }
 
