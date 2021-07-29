@@ -1,5 +1,5 @@
 
-He implementado una arquitectura MVVM. He querido hacer una app lo más actualizada posible según mis conocimientos en cuanto a tecnologías y arquitectura, para que en caso de que tomeis la decisión de incorporarme al equipo esta pueda ser lo más rentable posible. He tardado más de lo que me gustaría porque al ser muchas cosas nuevas no tengo una plantilla a mi gusto con esta arquitectura y todas las tecnologías que incluyo en esta app. Se han implementado todos los objetivos.
+He implementado una arquitectura MVVM. He querido hacer una app lo más actualizada posible en cuanto a lo que llevo estudiando estos meses en tecnologías y arquitectura, para que en caso de que tomeis la decisión de incorporarme al equipo pueda ser lo más rentable posible. He tardado más de lo que me gustaría porque al ser muchas cosas nuevas para mí aún no tengo una plantilla a mi gusto que incluya todo lo que considero básico a estas alturas. Se han implementado todos los objetivos.
 
 El proyecto consta de 4 módulos:
 - app: Es el módulo principal y contiene la parte de la vista, inyección de dependencias, servicio de sincronización con la api, y viewmodel.
@@ -16,8 +16,8 @@ Room, Koin, rxJava3, Retrofit, Glide, jUnit, Truth.
 
 
 ## Notas
-La parte de testing aún me queda mucho por aprender, pero al menos he incluído algunas pruebas en el módulo framework, que es el que considero más importante comprobar. Los tests se centran en la obtención de datos de BD, del servidor y en el funcionamiento de los mapper.
+La parte de testing aún me queda mucho por aprender, pero al menos he incluído algunas pruebas en el módulo framework, que es el que considero más importante comprobar. Los tests se centran en la obtención de datos de BD, del servidor y en el funcionamiento de los mapper, y se encuentran en el fichero DatabaseAndRemoteTest.kt.
 
 
-## Bugs encontrados
+# Bugs encontrados
 Al desplazar la lista hacia arriba y realizarse la carga de más datos se reinicia a su posición inicial. Por tiempo no me he querido detener en esto.
