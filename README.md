@@ -18,7 +18,3 @@ Room, Koin, rxJava3, Retrofit, Glide, jUnit, Truth.
 
 ## Notas
 La parte de testing aún me queda mucho por aprender, pero al menos he incluído algunas pruebas en el módulo framework, que es el que considero más importante comprobar. Los tests se centran en la obtención de datos de BD, del servidor y en el funcionamiento de los mapper, y se encuentran en el fichero DatabaseAndRemoteTest.kt.
-
-
-## Bugs encontrados
-Al desplazar la lista hacia arriba y realizarse la carga de más datos se reinicia a su posición inicial.
