@@ -15,7 +15,7 @@ class RepositoriesRemoteDataStore(
 ) : RepoDataStore {
 
     override fun getRepositories(): Single<List<Repo>> {
-        return service.getReposList(Utils.REPOS_QUERY_SIZE, Utils.REPOS_REMOTE_QUERY_PAGE++)
+        return service.getReposList(Utils.REPOS_QUERY_SIZE, Utils.REPOS_REMOTE_QUERY_PAGE)
             .map { response ->
                 val entities = mutableListOf<Repo>()
                 response.forEach {

@@ -20,7 +20,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class RepoViewModel(
     private val getCachedRepositoriesUseCase: GetCachedRepositoriesUseCase,
-    private val context: Context
 ) : ViewModel() {
 
     private val repositoriesList: MutableList<Repo> = mutableListOf()
@@ -41,7 +40,7 @@ class RepoViewModel(
         observableEvent.value = StartReposSyncService
     }
 
-    fun fetchRepositoriesAfterSync() {
+    fun fetchRepositoriesAfterSync(context: Context) {
         compositeDisposable.add(
             getCachedRepositoriesUseCase.execute()
                 .subscribe({ reposList ->
@@ -52,10 +51,11 @@ class RepoViewModel(
                             Empty(context.getString(R.string.got_repos_empty))
                         Log.i("INFO", "Repos vacíos")
                     } else {
-                        repositoriesLiveData.value = Success(repositoriesList)
+                        repositoriesLiveData.value = Success(reposList)
                         Log.v("SUCCESS", "Repos obtenidos")
                     }
                     Utils.REPOS_LOCAL_QUERY_OFFSET += Utils.REPOS_QUERY_SIZE
+                    ++Utils.REPOS_REMOTE_QUERY_PAGE
                 }, {
                     repositoriesLiveData.value = Error(context.getString(R.string.got_repos_error))
                     Log.e("ERROR", "Error al obtener los repos")

@@ -99,20 +99,24 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         setContentView(binding.root)
         setSupportActionBar(findViewById(R.id.toolbar))
         binding.toolbarLayout.title = title
-        binding.reposRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (!recyclerView.canScrollVertically(1) && (newState == RecyclerView.SCROLL_STATE_IDLE)) {
-                    try {
-                        showLoading()
-                        viewModel.fetchRepositories()
-                    } catch (e: Exception) {
-                        Log.e("ERROR CARGANDO", e.printStackTrace().toString())
-                        showError(getString(R.string.got_repos_error))
+        binding.reposRecycler.apply {
+            layoutManager = LinearLayoutManager(this@ScrollingActivity)
+            adapter = ReposAdapter(this@ScrollingActivity)
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (!recyclerView.canScrollVertically(1) && (newState == RecyclerView.SCROLL_STATE_IDLE)) {
+                        try {
+                            showLoading()
+                            viewModel.fetchRepositories()
+                        } catch (e: Exception) {
+                            Log.e("ERROR CARGANDO", e.printStackTrace().toString())
+                            showError(getString(R.string.got_repos_error))
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
     }
 
     private fun <T> handleResultStatus(status: ObjectStatus<T>) {
@@ -150,14 +154,12 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         val repos = data as List<*>
         repos.filterIsInstance<Repo>().also {
             showSuccess()
-            loadRecyclerContent(it.toMutableList())
+            updateRecyclerContent(it.toMutableList())
         }
     }
 
-    private fun loadRecyclerContent(repos: MutableList<Repo>) {
-        val recycler: RecyclerView = binding.reposRecycler
-        recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = ReposAdapter(this).apply { addItems(repos) }
+    private fun updateRecyclerContent(repos: MutableList<Repo>) {
+        (binding.reposRecycler.adapter as ReposAdapter).apply { addItems(repos) }
     }
 
     fun showSuccess() {
@@ -170,11 +172,11 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
     private fun sendSynchronisationCompleted(intent: Intent) {
         when (intent.getSerializableExtra(SYNC_COMPLETED)) {
             SyncResult.SUCCESS -> {
-                viewModel.fetchRepositoriesAfterSync()
+                viewModel.fetchRepositoriesAfterSync(this)
                 Toast.makeText(this, getString(R.string.synchronisation_finished), Toast.LENGTH_SHORT).show()
             }
             SyncResult.ERROR -> {
-                viewModel.fetchRepositoriesAfterSync()
+                viewModel.fetchRepositoriesAfterSync(this)
                 Toast.makeText(this, getString(R.string.synchronisation_failed), Toast.LENGTH_SHORT).show()
             }
         }
@@ -184,9 +186,9 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         AlertDialog.Builder(this)
             .setMessage(R.string.ask_which_url)
             .setPositiveButton(R.string.repo_option,
-                DialogInterface.OnClickListener { _, _ -> openUrl(repo.repo_html_url) })
+                { _, _ -> openUrl(repo.repo_html_url) })
             .setNegativeButton(R.string.owner_option,
-                DialogInterface.OnClickListener { _, _ ->
+                { _, _ ->
                     openUrl(repo.owner_html_url)
                 })
             .create().show()

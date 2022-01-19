@@ -16,12 +16,14 @@ import java.io.File
 
 class ReposAdapter(private val itemLongClickListener: OnItemLongClickListener) : RecyclerView.Adapter<ReposAdapter.RepoRowViewHolder>() {
 
-    private var items: MutableLiveData<MutableList<Repo>> = MutableLiveData(mutableListOf())
+    private val items: MutableLiveData<MutableList<Repo>> = MutableLiveData(mutableListOf())
     var context: Context? = null
 
     fun addItems(newRepos: MutableList<Repo>) {
+        val startIndex: Int = items.value!!.size
         items.value?.addAll(newRepos)
-        notifyDataSetChanged()
+        val endIndex = items.value!!.size - 1
+        notifyItemRangeChanged(startIndex, endIndex)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RepoRowViewHolder {
