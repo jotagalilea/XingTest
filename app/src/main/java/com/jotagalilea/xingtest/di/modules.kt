@@ -54,5 +54,5 @@ val repositoriesModule = module(override = true) {
     factory { GetCachedRepositoriesUseCase(get(), get(), get()) }
     factory { GetRemoteRepositoriesUseCase(get(), get(), get()) }
     factory { SaveRepositoriesUseCase(get(), get(), get()) }
-    viewModel { RepoViewModel(get(), androidContext()) }
+    viewModel { RepoViewModel(get()) }
 }
