@@ -185,12 +185,8 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
     override fun onLongClick(repo: Repo): Boolean {
         AlertDialog.Builder(this)
             .setMessage(R.string.ask_which_url)
-            .setPositiveButton(R.string.repo_option,
-                { _, _ -> openUrl(repo.repo_html_url) })
-            .setNegativeButton(R.string.owner_option,
-                { _, _ ->
-                    openUrl(repo.owner_html_url)
-                })
+            .setPositiveButton(R.string.repo_option) { _, _ -> openUrl(repo.repo_html_url) }
+            .setNegativeButton(R.string.owner_option) { _, _ -> openUrl(repo.owner_html_url) }
             .create().show()
         return true
     }
