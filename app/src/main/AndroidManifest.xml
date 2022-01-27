@@ -18,8 +18,8 @@
         android:theme="@style/Theme.XingTest">
         <activity
             android:name=".ui.main.ScrollingActivity"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.XingTest.NoActionBar">
+            android:theme="@style/Theme.XingTest.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

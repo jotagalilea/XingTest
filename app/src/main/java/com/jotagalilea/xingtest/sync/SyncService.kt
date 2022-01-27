@@ -6,19 +6,13 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
-import android.os.IBinder
-import android.os.Looper
-import android.os.Message
-import android.os.Process
+import android.os.*
 import android.util.Log
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.jotagalilea.xingtest.BuildConfig
 import com.jotagalilea.xingtest.R
 import com.jotagalilea.xingtest.data.repo.interactor.GetCachedRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.GetRemoteRepositoriesUseCase
@@ -29,7 +23,6 @@ import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.observers.DisposableCompletableObserver
 import org.koin.android.ext.android.inject
-import retrofit2.HttpException
 import java.util.concurrent.TimeUnit
 
 @Keep
@@ -128,9 +121,13 @@ class SyncService : Service() {
         try {
             reposDisposable?.add(getCachedReposUseCase.execute().flatMapCompletable { list ->
                 if (list.isEmpty())
-                    getRemoteRepositories()
-                        .retry(3)
-                        .timeout(60, TimeUnit.SECONDS) // Por motivos de depuración lo dejo en 60 segundos.
+                    getRemoteRepositories().apply {
+                        this.retry(3)
+                        if (BuildConfig.DEBUG)
+                            this.timeout(60, TimeUnit.SECONDS)
+                        else
+                            this.timeout(10, TimeUnit.SECONDS)
+                    }
                 else {
                     Completable.complete()
                 }
@@ -139,17 +136,21 @@ class SyncService : Service() {
                 stopSynchroniseService()
             }.subscribeWith(object : DisposableCompletableObserver() {
                 override fun onError(e: Throwable) {
-                    if (e is HttpException) {
+                    // Variante Retrofit:
+                    /*if (e is HttpException) {
                         val errorCode = e.code()
                         if (errorCode != 200) {
                             Log.e(TAG_SYNC_SERVICE, "No se ha podido completar la sincronización. Código: " + e.code())
-                            manageResult(ERROR)
                         }
                     } else {
                         e.message?.let { Log.e(TAG_SYNC_SERVICE, "No se ha podido completar la sincronización. Error: $it") }
                         e.printStackTrace()
-                        manageResult(ERROR)
                     }
+                    manageResult(ERROR)
+                    */
+                    // Variante Ktor:
+                    Log.e(TAG_SYNC_SERVICE, "No se ha podido realizar la sincronización. Error: ${e.localizedMessage}")
+                    manageResult(ERROR)
                 }
 
                 override fun onComplete() {
@@ -161,6 +162,7 @@ class SyncService : Service() {
             Thread.currentThread().interrupt()
         }
     }
+
 
     private fun getRemoteRepositories(): Completable {
         return getRemoteReposUseCase.execute()

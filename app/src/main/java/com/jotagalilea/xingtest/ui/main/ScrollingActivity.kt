@@ -2,7 +2,6 @@ package com.jotagalilea.xingtest.ui.main
 
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
@@ -71,21 +70,19 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
     }
 
     private fun setupObservers() {
-        viewModel.getRepositoriesLiveData().observe(this,
-            { status ->
-                handleResultStatus(status)
-            }
-        )
+        viewModel.getRepositoriesLiveData().observe(this
+        ) { status ->
+            handleResultStatus(status)
+        }
 
-        viewModel.observableEvent.observe(this,
-            { event ->
-                when (event) {
-                    ObservableEvent.StartReposSyncService -> {
-                        startSynchronisationProcess()
-                    }
+        viewModel.observableEvent.observe(this
+        ) { event ->
+            when (event) {
+                ObservableEvent.StartReposSyncService -> {
+                    startSynchronisationProcess()
                 }
             }
-        )
+        }
     }
 
     private fun startSynchronisationProcess() {
