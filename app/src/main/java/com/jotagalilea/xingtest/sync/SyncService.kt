@@ -12,26 +12,22 @@ import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.jotagalilea.xingtest.BuildConfig
 import com.jotagalilea.xingtest.R
 import com.jotagalilea.xingtest.data.repo.interactor.GetCachedRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.GetRemoteRepositoriesUseCase
 import com.jotagalilea.xingtest.data.repo.interactor.SaveRepositoriesUseCase
 import com.jotagalilea.xingtest.sync.SyncResult.ERROR
 import com.jotagalilea.xingtest.sync.SyncResult.SUCCESS
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.observers.DisposableCompletableObserver
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import java.util.concurrent.TimeUnit
 
 @Keep
 class SyncService : Service() {
 
     private var serviceLooper: Looper? = null
     private var serviceHandler: ServiceHandler? = null
-    private var compositeDisposable: CompositeDisposable? = null
-    private var reposDisposable: CompositeDisposable? = null
     private var localBroadcastManager: LocalBroadcastManager? = null
     private val getCachedReposUseCase: GetCachedRepositoriesUseCase by inject()
     private val getRemoteReposUseCase: GetRemoteRepositoriesUseCase by inject()
@@ -51,8 +47,6 @@ class SyncService : Service() {
     }
 
     override fun onCreate() {
-        compositeDisposable = CompositeDisposable()
-        reposDisposable = CompositeDisposable()
         localBroadcastManager = LocalBroadcastManager.getInstance(this)
 
         HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND).apply {
@@ -81,7 +75,7 @@ class SyncService : Service() {
         startForegroundSynchroniseService()
         Log.d(TAG_SYNC_SERVICE, "Iniciado servicio de sincronización...")
 
-        syncRepositories()
+        syncReposWithFlows()
     }
 
     private fun startForegroundSynchroniseService() {
@@ -110,65 +104,33 @@ class SyncService : Service() {
     }
 
     fun stopSynchroniseService() {
-        compositeDisposable?.clear()
-        reposDisposable?.clear()
         stopForeground(true)
         stopSelf()
         Log.d(TAG_SYNC_SERVICE, "Se ha parado el servicio de sincronización...")
     }
 
-    private fun syncRepositories() {
+    private fun syncReposWithFlows() {
         try {
-            reposDisposable?.add(getCachedReposUseCase.execute().flatMapCompletable { list ->
-                if (list.isEmpty())
-                    getRemoteRepositories().apply {
-                        this.retry(3)
-                        if (BuildConfig.DEBUG)
-                            this.timeout(60, TimeUnit.SECONDS)
-                        else
-                            this.timeout(10, TimeUnit.SECONDS)
-                    }
-                else {
-                    Completable.complete()
-                }
-
-            }.doFinally {
-                stopSynchroniseService()
-            }.subscribeWith(object : DisposableCompletableObserver() {
-                override fun onError(e: Throwable) {
-                    // Variante Retrofit:
-                    /*if (e is HttpException) {
-                        val errorCode = e.code()
-                        if (errorCode != 200) {
-                            Log.e(TAG_SYNC_SERVICE, "No se ha podido completar la sincronización. Código: " + e.code())
-                        }
+            CoroutineScope(Dispatchers.IO).launch {
+                getCachedReposUseCase.execute().also { list ->
+                    if (list.isEmpty()) {
+                        getRemoteReposWithFlows()
                     } else {
-                        e.message?.let { Log.e(TAG_SYNC_SERVICE, "No se ha podido completar la sincronización. Error: $it") }
-                        e.printStackTrace()
+                        Log.d(TAG_SYNC_SERVICE, "Repos obtenidos de DB")
                     }
-                    manageResult(ERROR)
-                    */
-                    // Variante Ktor:
-                    Log.e(TAG_SYNC_SERVICE, "No se ha podido realizar la sincronización. Error: ${e.localizedMessage}")
-                    manageResult(ERROR)
                 }
-
-                override fun onComplete() {
-                    Log.d(TAG_SYNC_SERVICE, "Sincronización completada")
-                    manageResult(SUCCESS)
-                }
-            }))
+                manageResult(SUCCESS)
+            }
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
         }
     }
 
 
-    private fun getRemoteRepositories(): Completable {
-        return getRemoteReposUseCase.execute()
-            .flatMapCompletable {
-                saveReposUseCase.execute(it)
-            }
+    private suspend fun getRemoteReposWithFlows() {
+        getRemoteReposUseCase.execute().also {
+            saveReposUseCase.execute(it)
+        }
     }
 
     private fun manageResult(result: SyncResult) {

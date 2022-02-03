@@ -46,21 +46,15 @@ dependencies {
     implementation "io.insert-koin:koin-android:$koin_version"
     //endregion
 
+    //region Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
+    //endregion
+
     //region Room
     implementation "androidx.room:room-runtime:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-rxjava3:$roomVersion"
-    //endregion
-
-    //region RxJava
-    implementation "io.reactivex.rxjava3:rxjava:3.0.13"
-    implementation "io.reactivex.rxjava3:rxandroid:3.0.0"
-    implementation "io.reactivex.rxjava3:rxkotlin:3.0.1"
-    implementation "io.reactivex.rxjava3:rxkotlin:3.0.1"
-    //endregion
-
-    //region Retrofit
-    //implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     //endregion
 
     //region Glide

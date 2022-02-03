@@ -2,20 +2,19 @@ package com.jotagalilea.xingtest.data.repo.repository
 
 import com.jotagalilea.xingtest.data.repo.repository.datastore.RepoDataStoreFactory
 import com.jotagalilea.xingtest.model.Repo
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Single
+import kotlinx.coroutines.Job
 
 class RepoDataRepository(private val factory: RepoDataStoreFactory) : RepoRepository {
 
-    override fun getCachedRepositories(): Single<List<Repo>> {
-        return factory.retrieveCachedDataStore().getRepositories()
+    override suspend fun getCachedRepos(): List<Repo> {
+        return factory.retrieveCachedDataStore().getRepos()
     }
 
-    override fun getRemoteRepositories(): Single<List<Repo>> {
-        return factory.retrieveRemoteDataStore().getRepositories()
+    override suspend fun getRemoteRepos(): List<Repo> {
+        return factory.retrieveRemoteDataStore().getRepos()
     }
 
-    override fun saveRepository(repo: Repo): Completable {
-        return factory.retrieveCachedDataStore().saveRepository(repo)
+    override suspend fun saveRepoJob(repo: Repo): Job {
+        return factory.retrieveCachedDataStore().saveRepoJob(repo)
     }
 }

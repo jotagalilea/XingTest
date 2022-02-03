@@ -17,49 +17,43 @@ import com.jotagalilea.xingtest.ui.common.ObservableEvent
 import com.jotagalilea.xingtest.ui.common.ObservableEvent.StartReposSyncService
 import com.jotagalilea.xingtest.ui.common.SingleLiveEvent
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 class RepoViewModel(
     private val getCachedRepositoriesUseCase: GetCachedRepositoriesUseCase,
 ) : ViewModel() {
 
     private val repositoriesList: MutableList<Repo> = mutableListOf()
-    private val repositoriesLiveData: MutableLiveData<ObjectStatus<List<Repo>>> = MutableLiveData()
-    private var compositeDisposable: CompositeDisposable
+    private val reposStateFlow = MutableStateFlow<ObjectStatus<List<Repo>>>(Loading())
     val observableEvent: SingleLiveEvent<ObservableEvent> = SingleLiveEvent()
 
-    init {
-        compositeDisposable = CompositeDisposable()
-        repositoriesLiveData.value = Loading()
-    }
 
     fun getRepositories() = repositoriesList
-    fun getRepositoriesLiveData() = repositoriesLiveData
+    fun getRepositoriesStateFlow() = reposStateFlow
 
     fun fetchRepositories() {
-        repositoriesLiveData.value = Loading()
+        reposStateFlow.value = Loading()
         observableEvent.value = StartReposSyncService
     }
-
-    fun fetchRepositoriesAfterSync(context: Context) {
-        compositeDisposable.add(
-            getCachedRepositoriesUseCase.execute()
-                .subscribe({ reposList ->
-                    repositoriesList.addAll(reposList)
-
-                    if (repositoriesList.isEmpty()) {
-                        repositoriesLiveData.value =
-                            Empty(context.getString(R.string.got_repos_empty))
-                        Log.i("INFO", "Repos vacíos")
-                    } else {
-                        repositoriesLiveData.value = Success(reposList)
-                        Log.v("SUCCESS", "Repos obtenidos")
-                    }
-                    Utils.REPOS_LOCAL_QUERY_OFFSET += Utils.REPOS_QUERY_SIZE
-                    ++Utils.REPOS_REMOTE_QUERY_PAGE
-                }, {
-                    repositoriesLiveData.value = Error(context.getString(R.string.got_repos_error))
-                    Log.e("ERROR", "Error al obtener los repos")
-                })
-        )
+    
+    fun fetchReposAfterSync(context: Context) {
+        CoroutineScope(Dispatchers.IO).launch {
+            getCachedRepositoriesUseCase.execute().also { repos ->
+                repositoriesList.addAll(repos)
+                if (repositoriesList.isEmpty()) {
+                    reposStateFlow.value = Empty(context.getString(R.string.got_repos_empty))
+                    Log.i("INFO", "Repos vacíos")
+                } else {
+                    reposStateFlow.value = Success(repos)
+                    Log.v("SUCCESS", "Repos obtenidos")
+                }
+            }
+            Utils.REPOS_LOCAL_QUERY_OFFSET += Utils.REPOS_QUERY_SIZE
+            ++Utils.REPOS_REMOTE_QUERY_PAGE
+            //TODO: Falta el caso de error al obtener de BD, ¿puede ocurrir?.
+        }
     }
 }

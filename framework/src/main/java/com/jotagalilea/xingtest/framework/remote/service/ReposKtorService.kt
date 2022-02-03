@@ -16,12 +16,15 @@ class ReposKtorService(
     }
 
 
-    fun getRepos(): List<ReposResponse> = runBlocking {
-        return@runBlocking factory.makeClient().get(BASE_URL + REPOS_URL) {
+    suspend fun getRepos(): List<ReposResponse> {
+        return factory.makeClient().get(BASE_URL + REPOS_URL) {
             parameter("per_page", Utils.REPOS_QUERY_SIZE)
             parameter("page", Utils.REPOS_REMOTE_QUERY_PAGE)
         }.body()
+    }
 
+    fun closeService(){
+        factory.closeClient()
     }
 
 }

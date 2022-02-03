@@ -1,9 +1,9 @@
 package com.jotagalilea.xingtest.data.repo.repository.datastore
 
 import com.jotagalilea.xingtest.model.Repo
-import io.reactivex.rxjava3.core.Completable
+import kotlinx.coroutines.Job
 
 interface RepoCacheDataStore : RepoDataStore {
 
-    fun saveRepository(repo: Repo): Completable
+    fun saveRepoJob(repo: Repo): Job
 }

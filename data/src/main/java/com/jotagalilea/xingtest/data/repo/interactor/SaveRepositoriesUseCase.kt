@@ -1,24 +1,22 @@
 package com.jotagalilea.xingtest.data.repo.interactor
 
-import com.jotagalilea.xingtest.data.executor.PostExecutionThread
-import com.jotagalilea.xingtest.data.executor.ThreadExecutor
-import com.jotagalilea.xingtest.data.interactor.CompletableUseCase
+import com.jotagalilea.xingtest.data.interactor.SaveUseCase
 import com.jotagalilea.xingtest.data.repo.repository.RepoRepository
 import com.jotagalilea.xingtest.model.Repo
-import io.reactivex.rxjava3.core.Completable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class SaveRepositoriesUseCase(
-    private val repository: RepoRepository,
-    threadExecutor: ThreadExecutor,
-    postExecutionThread: PostExecutionThread
-) : CompletableUseCase<List<Repo>?>(threadExecutor, postExecutionThread) {
+    private val repository: RepoRepository
+) : SaveUseCase<List<Repo>>(){
 
-    override fun buildUseCaseObservable(params: List<Repo>?): Completable {
-        return params?.let {
-            Completable.merge(it.map { repo ->
-                repository.saveRepository(repo)
-            })
-
-        } ?: Completable.error(IllegalArgumentException("Params no puede ser null"))
+    override suspend fun buildUseCaseObservable(params: List<Repo>?) {
+        CoroutineScope(Dispatchers.IO).launch {
+            params?.forEach {
+                repository.saveRepoJob(it)
+            }
+        }
     }
+
 }

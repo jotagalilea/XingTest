@@ -1,12 +1,11 @@
 package com.jotagalilea.xingtest.data.repo.repository
 
 import com.jotagalilea.xingtest.model.Repo
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Single
+import kotlinx.coroutines.Job
 
 interface RepoRepository {
 
-    fun getCachedRepositories(): Single<List<Repo>>
-    fun getRemoteRepositories(): Single<List<Repo>>
-    fun saveRepository(repo: Repo): Completable
+    suspend fun getCachedRepos(): List<Repo>
+    suspend fun getRemoteRepos(): List<Repo>
+    suspend fun saveRepoJob(repo: Repo): Job
 }

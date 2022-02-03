@@ -11,8 +11,6 @@ import com.jotagalilea.xingtest.framework.local.database.ReposDatabase
 import com.jotagalilea.xingtest.framework.local.mapper.RepositoryCacheMapper
 import com.jotagalilea.xingtest.framework.remote.mapper.RepositoryRemoteMapper
 import com.jotagalilea.xingtest.framework.remote.response.ReposResponse
-import com.jotagalilea.xingtest.framework.remote.service.ReposService
-import com.jotagalilea.xingtest.framework.remote.service.ReposServiceFactory
 import com.jotagalilea.xingtest.model.Repo
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest

@@ -9,6 +9,7 @@ buildscript {
     ext.roomVersion = '2.4.1'
     ext.glideVersion = '4.12.0'
     ext.ktorVersion = '2.0.0-beta-1'
+    ext.coroutinesVersion = '1.6.0'
     repositories {
         google()
         mavenCentral()

@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,6 +30,11 @@ import com.jotagalilea.xingtest.ui.common.ObjectStatus.Loading
 import com.jotagalilea.xingtest.ui.common.ObjectStatus.Success
 import com.jotagalilea.xingtest.ui.common.ObservableEvent
 import com.jotagalilea.xingtest.viewmodel.RepoViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListener {
@@ -36,6 +42,8 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
     private lateinit var binding: ActivityScrollingBinding
     private val viewModel: RepoViewModel by viewModel()
     private var localBroadcastManager: LocalBroadcastManager? = null
+    private lateinit var uiJob: Job
+    private lateinit var ioJob: Job
     private val synchronisationBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
             intent?.let {
@@ -54,6 +62,7 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         initializeSynchronisationBroadcastReceiver()
         setupUI()
         setupObservers()
+        //launchSync()
     }
 
     private fun initializeSynchronisationBroadcastReceiver() {
@@ -63,23 +72,36 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         localBroadcastManager?.registerReceiver(synchronisationBroadcastReceiver, filter)
     }
 
-    override fun onResume() {
+    /*override fun onResume() {
         super.onResume()
+        // FIXME: Aquí estoy lanzando otra vez la sync!!
         if (viewModel.getRepositories().isEmpty())
             viewModel.fetchRepositories()
+    }*/
+
+    override fun onResume() {
+        super.onResume()
+        launchSync()
     }
 
     private fun setupObservers() {
-        viewModel.getRepositoriesLiveData().observe(this
-        ) { status ->
-            handleResultStatus(status)
+        //viewModel.getRepositoriesLiveData().observe(this
+        uiJob = CoroutineScope(Dispatchers.Main).launch {
+            //TODO: Estudiar comportamiento del collect:
+            viewModel.getRepositoriesStateFlow().collect { status ->
+                handleResultStatus(status)
+            }
         }
+    }
 
-        viewModel.observableEvent.observe(this
-        ) { event ->
-            when (event) {
-                ObservableEvent.StartReposSyncService -> {
-                    startSynchronisationProcess()
+    private fun launchSync(){
+        //ioJob = lifecycleScope.launchWhenResumed {
+        ioJob = CoroutineScope(Dispatchers.Main).launch {
+            viewModel.observableEvent.observe(this@ScrollingActivity) { event ->
+                when (event) {
+                    ObservableEvent.StartReposSyncService -> {
+                        startSynchronisationProcess()
+                    }
                 }
             }
         }
@@ -116,7 +138,8 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
         }
     }
 
-    private fun <T> handleResultStatus(status: ObjectStatus<T>) {
+    private fun <T> handleResultStatus(status: ObjectStatus<T>) = CoroutineScope(Dispatchers.Main).launch {
+        // FIXME: La UI se actualiza antes de que se obtengan todos los datos.
         when (status) {
             is Loading -> showLoading()
             is Success -> setupScreenForSuccess(status.data)
@@ -169,11 +192,13 @@ class ScrollingActivity : AppCompatActivity(), ReposAdapter.OnItemLongClickListe
     private fun sendSynchronisationCompleted(intent: Intent) {
         when (intent.getSerializableExtra(SYNC_COMPLETED)) {
             SyncResult.SUCCESS -> {
-                viewModel.fetchRepositoriesAfterSync(this)
+                //viewModel.fetchRepositoriesAfterSync(this)
+                viewModel.fetchReposAfterSync(this)
                 Toast.makeText(this, getString(R.string.synchronisation_finished), Toast.LENGTH_SHORT).show()
             }
             SyncResult.ERROR -> {
-                viewModel.fetchRepositoriesAfterSync(this)
+                //viewModel.fetchRepositoriesAfterSync(this)
+                viewModel.fetchReposAfterSync(this)
                 Toast.makeText(this, getString(R.string.synchronisation_failed), Toast.LENGTH_SHORT).show()
             }
         }

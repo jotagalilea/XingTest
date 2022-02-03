@@ -7,8 +7,9 @@ import com.jotagalilea.xingtest.framework.Utils
 import com.jotagalilea.xingtest.framework.local.database.ReposDatabase
 import com.jotagalilea.xingtest.framework.local.mapper.RepositoryCacheMapper
 import com.jotagalilea.xingtest.model.Repo
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Single
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class RepositoriesCachedDataStore constructor(
     private val database: ReposDatabase,
@@ -16,24 +17,16 @@ class RepositoriesCachedDataStore constructor(
     private val avatarCacher: AvatarCacher
 ) : RepoCacheDataStore {
 
-    override fun getRepositories(): Single<List<Repo>> {
-        return Single.defer {
-            Single.just(database.cachedRepositoriesDao().getRepositories(Utils.REPOS_QUERY_SIZE, Utils.REPOS_LOCAL_QUERY_OFFSET))
-        }.map {
-            it.map { repoDBobject ->
-                mapper.mapToModel(repoDBobject)
-            }
-        }
+    override suspend fun getRepos(): List<Repo> {
+        return database.cachedRepositoriesDao().getRepositories(Utils.REPOS_QUERY_SIZE, Utils.REPOS_LOCAL_QUERY_OFFSET)
+            .map { mapper.mapToModel(it) }
     }
 
-    override fun saveRepository(repo: Repo): Completable {
-        return Completable.defer {
-            database.cachedRepositoriesDao().insertRepository(
-                mapper.mapToCached(repo)
-            )
-            avatarCacher.savedAvatars[repo.avatar_url] = repo.avatar_file
-            Log.d("INSERT en tabla ${Utils.REPOSITORIES_TABLE_NAME}", "guardado repo ${repo.name}")
-            Completable.complete()
-        }
+    override fun saveRepoJob(repo: Repo) = CoroutineScope(Dispatchers.IO).launch {
+        database.cachedRepositoriesDao().insertRepository(
+            mapper.mapToCached(repo)
+        )
+        avatarCacher.savedAvatars[repo.avatar_url] = repo.avatar_file
+        Log.d("INSERT en tabla ${Utils.REPOSITORIES_TABLE_NAME}", "guardado repo ${repo.name}")
     }
 }
